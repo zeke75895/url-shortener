@@ -38,7 +38,7 @@ function showError(box, messages) {
     list.innerHTML = "";
     messages.forEach(function (message) {
         const item = document.createElement("li");
-        item.textContent = message.toUpperCase();
+        item.textContent = message;
         list.appendChild(item);
     });
     box.hidden = false;
