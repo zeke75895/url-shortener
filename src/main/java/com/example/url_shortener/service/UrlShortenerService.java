@@ -1,0 +1,47 @@
+package com.example.url_shortener.service;
+
+import java.security.SecureRandom;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.example.url_shortener.exception.UrlNotFoundException;
+import com.example.url_shortener.model.UrlMapping;
+import com.example.url_shortener.repository.UrlMappingRepository;
+
+@Service
+public class UrlShortenerService {
+
+    private static final String ALPHABET =
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    private static final int CODE_LENGTH = 6;
+
+    private final UrlMappingRepository repository;
+    private final SecureRandom random = new SecureRandom();
+
+    public UrlShortenerService(UrlMappingRepository repository) {
+        this.repository = repository;
+    }
+
+    @Transactional
+    public String shortenUrl(String longUrl) {
+        String shortCode = generateShortCode();
+        repository.save(new UrlMapping(longUrl, shortCode));
+        return shortCode;
+    }
+
+    @Transactional(readOnly = true)
+    public String getOriginalUrl(String shortCode) {
+        return repository.findByShortCode(shortCode)
+                .map(UrlMapping::getLongUrl)
+                .orElseThrow(() -> new UrlNotFoundException(shortCode));
+    }
+
+    private String generateShortCode() {
+        StringBuilder code = new StringBuilder(CODE_LENGTH);
+        for (int i = 0; i < CODE_LENGTH; i++) {
+            code.append(ALPHABET.charAt(random.nextInt(ALPHABET.length())));
+        }
+        return code.toString();
+    }
+}
