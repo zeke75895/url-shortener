@@ -261,6 +261,11 @@ a:focus-visible {
     white-space: nowrap;
 }
 
+.recent-table .gone {
+    color: var(--red);
+    text-shadow: var(--red-glow);
+}
+
 .small-button {
     margin-top: 16px;
     padding: 4px 12px;

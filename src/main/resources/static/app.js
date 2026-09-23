@@ -24,7 +24,6 @@ const RECENT_LINKS_KEY = "urlShortener.recentLinks";
 const MAX_RECENT_LINKS = 5;
 
 const REFRESH_INTERVAL_MS = 5000;
-let latestShortCode = null;
 
 // ---------- Helpers ----------
 
@@ -81,7 +80,6 @@ function showShortenResult(body) {
     addRecentLink(body.shortCode, longUrlInput.value.trim());
 
     // Show stats for the new code right away; autoRefreshStats keeps them current
-    latestShortCode = body.shortCode;
     statsCodeInput.value = body.shortCode;
     statsForm.requestSubmit();
 }
@@ -166,7 +164,8 @@ statsForm.addEventListener("submit", handleStatsSubmit);
 
 // ---------- Recent links (saved in localStorage) ----------
 
-// Each saved link looks like { shortCode, longUrl, clickCount }, newest first
+// Each saved link looks like { shortCode, longUrl, clickCount }, newest first.
+// clickCount is null when the server no longer knows the code.
 function loadRecentLinks() {
     try {
         const links = JSON.parse(localStorage.getItem(RECENT_LINKS_KEY));
@@ -227,7 +226,13 @@ function renderRecentLinks() {
 
         const clicksCell = document.createElement("td");
         clicksCell.className = "col-clicks";
-        clicksCell.textContent = String(link.clickCount).padStart(6, "0");
+        if (link.clickCount === null) {
+            clicksCell.textContent = "GONE";
+            clicksCell.classList.add("gone");
+            clicksCell.title = "Not found. The in-memory database resets when the app restarts.";
+        } else {
+            clicksCell.textContent = String(link.clickCount).padStart(6, "0");
+        }
 
         row.append(codeCell, urlCell, clicksCell);
         recentBody.appendChild(row);
@@ -248,20 +253,43 @@ recentClearButton.addEventListener("click", handleClearRecent);
 
 // ---------- Auto-refresh ----------
 
-// Every 5 seconds, re-fetch stats for the most recently shortened code while the stats
-// panel is showing it. setTimeout schedules the next run only after this one finishes,
+// Fetches fresh stats for one code and updates the recent links list and stats panel.
+// A 404 means the link no longer exists (the in-memory database resets on restart).
+async function refreshStatsFor(shortCode) {
+    try {
+        const response = await fetch("/api/stats/" + encodeURIComponent(shortCode));
+        if (response.status === 404) {
+            updateRecentClickCount(shortCode, null);
+            return;
+        }
+        if (!response.ok) {
+            return;
+        }
+        const body = await response.json();
+        updateRecentClickCount(body.shortCode, body.clickCount);
+        // Re-check: the user may have looked up a different code while this request was running
+        if (isStatsShowing(body.shortCode)) {
+            showStatsResult(body);
+        }
+    } catch (error) {
+        // Server unreachable; try again on the next run
+    }
+}
+
+// Every 5 seconds, refresh every click count on the page: the recent links (newest
+// first, so this includes the most recently shortened code) plus whatever the stats
+// panel is showing. setTimeout schedules the next run only after this one finishes,
 // so slow responses can never pile up the way they can with setInterval.
 async function autoRefreshStats() {
-    if (latestShortCode !== null && isStatsShowing(latestShortCode) && !document.hidden) {
-        try {
-            const response = await fetch("/api/stats/" + encodeURIComponent(latestShortCode));
-            // Re-check: the user may have looked up a different code while this request was running
-            if (response.ok && isStatsShowing(latestShortCode)) {
-                showStatsResult(await response.json());
-            }
-        } catch (error) {
-            // Server unreachable; try again on the next run
+    if (!document.hidden) {
+        const shortCodes = loadRecentLinks().map(function (link) {
+            return link.shortCode;
+        });
+        const shownCode = document.getElementById("stats-short-code").textContent;
+        if (!statsResult.hidden && !shortCodes.includes(shownCode)) {
+            shortCodes.push(shownCode);
         }
+        await Promise.all(shortCodes.map(refreshStatsFor));
     }
     setTimeout(autoRefreshStats, REFRESH_INTERVAL_MS);
 }
@@ -270,11 +298,10 @@ async function autoRefreshStats() {
 
 renderRecentLinks();
 
-// After a page refresh, keep tracking the newest saved link
+// After a page refresh, pre-fill the stats panel with the newest saved link
 const savedLinks = loadRecentLinks();
 if (savedLinks.length > 0) {
-    latestShortCode = savedLinks[0].shortCode;
-    statsCodeInput.value = latestShortCode;
+    statsCodeInput.value = savedLinks[0].shortCode;
 }
 
 autoRefreshStats();
