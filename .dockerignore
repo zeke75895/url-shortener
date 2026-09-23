@@ -1,0 +1,24 @@
+# Build output (the image builds its own jar)
+target/
+
+# Version control
+.git/
+.gitignore
+.gitattributes
+
+# IDE and OS files
+.vscode/
+.idea/
+*.iml
+.DS_Store
+
+# Maven wrapper (the build stage uses the Maven image instead)
+.mvn/
+mvnw
+mvnw.cmd
+
+# Docs and Docker files not needed inside the build context
+HELP.md
+*.md
+Dockerfile
+.dockerignore
