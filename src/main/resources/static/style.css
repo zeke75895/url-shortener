@@ -217,6 +217,57 @@ a:focus-visible {
     overflow-wrap: anywhere;
 }
 
+/* ---------- Recent links ---------- */
+
+.muted {
+    margin: 0;
+    color: var(--green-dim);
+}
+
+.recent-table {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+}
+
+.recent-table th {
+    padding: 0 8px 6px 0;
+    text-align: left;
+    font-weight: normal;
+    color: var(--amber);
+    text-shadow: 0 0 4px rgba(255, 176, 0, 0.6);
+    border-bottom: 2px dashed var(--green-dim);
+}
+
+.recent-table td {
+    padding: 6px 8px 6px 0;
+    border-bottom: 1px dotted var(--green-dim);
+}
+
+.recent-table .col-code {
+    width: 8ch;
+}
+
+.recent-table .col-clicks {
+    width: 8ch;
+    padding-right: 0;
+    text-align: right;
+}
+
+/* Long URLs are cut off with "..."; the full URL is in the title tooltip */
+.recent-table .cell-url {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.small-button {
+    margin-top: 16px;
+    padding: 4px 12px;
+    font-size: 0.875rem;
+    box-shadow: 3px 3px 0 var(--green-dim);
+}
+
 /* ---------- Errors ---------- */
 
 .error-box {

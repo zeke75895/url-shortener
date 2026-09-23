@@ -15,6 +15,14 @@ const statsButton = document.getElementById("stats-button");
 const statsError = document.getElementById("stats-error");
 const statsResult = document.getElementById("stats-result");
 
+const recentEmpty = document.getElementById("recent-empty");
+const recentTable = document.getElementById("recent-table");
+const recentBody = document.getElementById("recent-body");
+const recentClearButton = document.getElementById("recent-clear");
+
+const RECENT_LINKS_KEY = "urlShortener.recentLinks";
+const MAX_RECENT_LINKS = 5;
+
 const REFRESH_INTERVAL_MS = 5000;
 let latestShortCode = null;
 
@@ -70,6 +78,8 @@ function showShortenResult(body) {
     resultLink.textContent = body.shortUrl;
     shortenResult.hidden = false;
 
+    addRecentLink(body.shortCode, longUrlInput.value.trim());
+
     // Show stats for the new code right away; autoRefreshStats keeps them current
     latestShortCode = body.shortCode;
     statsCodeInput.value = body.shortCode;
@@ -121,6 +131,7 @@ function showStatsResult(body) {
     document.getElementById("stats-clicks").textContent = String(body.clickCount).padStart(6, "0");
     document.getElementById("stats-created").textContent = formatTimestamp(body.createdAt);
     statsResult.hidden = false;
+    updateRecentClickCount(body.shortCode, body.clickCount);
 }
 
 async function handleStatsSubmit(event) {
@@ -153,6 +164,88 @@ async function handleStatsSubmit(event) {
 
 statsForm.addEventListener("submit", handleStatsSubmit);
 
+// ---------- Recent links (saved in localStorage) ----------
+
+// Each saved link looks like { shortCode, longUrl, clickCount }, newest first
+function loadRecentLinks() {
+    try {
+        const links = JSON.parse(localStorage.getItem(RECENT_LINKS_KEY));
+        return Array.isArray(links) ? links : [];
+    } catch (error) {
+        return [];
+    }
+}
+
+function saveRecentLinks(links) {
+    try {
+        localStorage.setItem(RECENT_LINKS_KEY, JSON.stringify(links));
+    } catch (error) {
+        // Storage is full or blocked (e.g. private mode); the list just won't persist
+    }
+}
+
+function addRecentLink(shortCode, longUrl) {
+    const links = loadRecentLinks().filter(function (link) {
+        return link.shortCode !== shortCode;
+    });
+    links.unshift({ shortCode: shortCode, longUrl: longUrl, clickCount: 0 });
+    saveRecentLinks(links.slice(0, MAX_RECENT_LINKS));
+    renderRecentLinks();
+}
+
+function updateRecentClickCount(shortCode, clickCount) {
+    const links = loadRecentLinks();
+    const link = links.find(function (item) {
+        return item.shortCode === shortCode;
+    });
+    if (link && link.clickCount !== clickCount) {
+        link.clickCount = clickCount;
+        saveRecentLinks(links);
+        renderRecentLinks();
+    }
+}
+
+function renderRecentLinks() {
+    const links = loadRecentLinks();
+    recentBody.innerHTML = "";
+
+    links.forEach(function (link) {
+        const row = document.createElement("tr");
+
+        const codeCell = document.createElement("td");
+        const codeLink = document.createElement("a");
+        codeLink.href = window.location.origin + "/" + encodeURIComponent(link.shortCode);
+        codeLink.target = "_blank";
+        codeLink.rel = "noopener";
+        codeLink.textContent = link.shortCode;
+        codeCell.appendChild(codeLink);
+
+        const urlCell = document.createElement("td");
+        urlCell.className = "cell-url";
+        urlCell.textContent = link.longUrl;
+        urlCell.title = link.longUrl;
+
+        const clicksCell = document.createElement("td");
+        clicksCell.className = "col-clicks";
+        clicksCell.textContent = String(link.clickCount).padStart(6, "0");
+
+        row.append(codeCell, urlCell, clicksCell);
+        recentBody.appendChild(row);
+    });
+
+    const hasLinks = links.length > 0;
+    recentTable.hidden = !hasLinks;
+    recentClearButton.hidden = !hasLinks;
+    recentEmpty.hidden = hasLinks;
+}
+
+function handleClearRecent() {
+    saveRecentLinks([]);
+    renderRecentLinks();
+}
+
+recentClearButton.addEventListener("click", handleClearRecent);
+
 // ---------- Auto-refresh ----------
 
 // Every 5 seconds, re-fetch stats for the most recently shortened code while the stats
@@ -171,6 +264,17 @@ async function autoRefreshStats() {
         }
     }
     setTimeout(autoRefreshStats, REFRESH_INTERVAL_MS);
+}
+
+// ---------- Start-up ----------
+
+renderRecentLinks();
+
+// After a page refresh, keep tracking the newest saved link
+const savedLinks = loadRecentLinks();
+if (savedLinks.length > 0) {
+    latestShortCode = savedLinks[0].shortCode;
+    statsCodeInput.value = latestShortCode;
 }
 
 autoRefreshStats();

@@ -44,8 +44,24 @@
         </div>
     </section>
 
+    <section class="panel" aria-labelledby="recent-heading">
+        <h2 id="recent-heading">[2] RECENT LINKS</h2>
+        <p id="recent-empty" class="muted">NO LINKS YET. SHORTEN ONE ABOVE.</p>
+        <table id="recent-table" class="recent-table" hidden>
+            <thead>
+            <tr>
+                <th scope="col" class="col-code">CODE</th>
+                <th scope="col">ORIGINAL URL</th>
+                <th scope="col" class="col-clicks">CLICKS</th>
+            </tr>
+            </thead>
+            <tbody id="recent-body"></tbody>
+        </table>
+        <button id="recent-clear" class="small-button" type="button" hidden>CLEAR</button>
+    </section>
+
     <section class="panel" aria-labelledby="stats-heading">
-        <h2 id="stats-heading">[2] CHECK STATS</h2>
+        <h2 id="stats-heading">[3] CHECK STATS</h2>
         <form id="stats-form" novalidate>
             <label for="stats-code">ENTER SHORT CODE:</label>
             <div class="input-row">
