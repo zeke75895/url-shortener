@@ -15,6 +15,9 @@ const statsButton = document.getElementById("stats-button");
 const statsError = document.getElementById("stats-error");
 const statsResult = document.getElementById("stats-result");
 
+const REFRESH_INTERVAL_MS = 5000;
+let latestShortCode = null;
+
 // ---------- Helpers ----------
 
 // Returns the parsed JSON body, or null if the body is empty or not JSON
@@ -67,8 +70,10 @@ function showShortenResult(body) {
     resultLink.textContent = body.shortUrl;
     shortenResult.hidden = false;
 
-    // Pre-fill the stats panel so the user can check clicks with one button press
+    // Show stats for the new code right away; autoRefreshStats keeps them current
+    latestShortCode = body.shortCode;
     statsCodeInput.value = body.shortCode;
+    statsForm.requestSubmit();
 }
 
 async function handleShortenSubmit(event) {
@@ -104,6 +109,10 @@ shortenForm.addEventListener("submit", handleShortenSubmit);
 // "2026-09-23T21:22:18.629139Z" -> "2026-09-23 21:22:18 UTC"
 function formatTimestamp(isoString) {
     return isoString.replace("T", " ").slice(0, 19) + " UTC";
+}
+
+function isStatsShowing(shortCode) {
+    return !statsResult.hidden && document.getElementById("stats-short-code").textContent === shortCode;
 }
 
 function showStatsResult(body) {
@@ -143,3 +152,25 @@ async function handleStatsSubmit(event) {
 }
 
 statsForm.addEventListener("submit", handleStatsSubmit);
+
+// ---------- Auto-refresh ----------
+
+// Every 5 seconds, re-fetch stats for the most recently shortened code while the stats
+// panel is showing it. setTimeout schedules the next run only after this one finishes,
+// so slow responses can never pile up the way they can with setInterval.
+async function autoRefreshStats() {
+    if (latestShortCode !== null && isStatsShowing(latestShortCode) && !document.hidden) {
+        try {
+            const response = await fetch("/api/stats/" + encodeURIComponent(latestShortCode));
+            // Re-check: the user may have looked up a different code while this request was running
+            if (response.ok && isStatsShowing(latestShortCode)) {
+                showStatsResult(await response.json());
+            }
+        } catch (error) {
+            // Server unreachable; try again on the next run
+        }
+    }
+    setTimeout(autoRefreshStats, REFRESH_INTERVAL_MS);
+}
+
+autoRefreshStats();
