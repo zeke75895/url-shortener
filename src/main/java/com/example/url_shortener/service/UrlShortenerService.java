@@ -47,6 +47,12 @@ public class UrlShortenerService {
         return longUrl;
     }
 
+    @Transactional(readOnly = true)
+    public UrlMapping getStats(String shortCode) {
+        return repository.findByShortCode(shortCode)
+                .orElseThrow(() -> new UrlNotFoundException(shortCode));
+    }
+
     private String generateShortCode() {
         StringBuilder code = new StringBuilder(CODE_LENGTH);
         for (int i = 0; i < CODE_LENGTH; i++) {

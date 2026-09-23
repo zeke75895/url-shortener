@@ -4,6 +4,8 @@ import java.net.URI;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.url_shortener.dto.ShortenRequest;
 import com.example.url_shortener.dto.ShortenResponse;
+import com.example.url_shortener.dto.StatsResponse;
 import com.example.url_shortener.service.UrlShortenerService;
 
 import jakarta.validation.Valid;
@@ -34,5 +37,10 @@ public class UrlController {
         String shortUrl = baseUrl + "/" + shortCode;
         return ResponseEntity.created(URI.create(shortUrl))
                 .body(new ShortenResponse(shortCode, shortUrl));
+    }
+
+    @GetMapping("/stats/{shortCode}")
+    public StatsResponse stats(@PathVariable String shortCode) {
+        return StatsResponse.from(urlShortenerService.getStats(shortCode));
     }
 }
