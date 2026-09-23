@@ -1,0 +1,273 @@
+/* ==========================================================
+   URL SHORTENER - retro terminal theme
+   ========================================================== */
+
+:root {
+    --bg: #0a0d0a;
+    --screen: #000000;
+    --green: #33ff66;
+    --green-dim: #1b8a3a;
+    --amber: #ffb000;
+    --red: #ff4d4d;
+    --glow: 0 0 4px rgba(51, 255, 102, 0.6);
+    --red-glow: 0 0 4px rgba(255, 77, 77, 0.6);
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+[hidden] {
+    display: none !important;
+}
+
+html,
+body {
+    margin: 0;
+    min-height: 100%;
+    background: var(--bg);
+}
+
+body {
+    color: var(--green);
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: 16px;
+    line-height: 1.5;
+    text-shadow: var(--glow);
+    animation: flicker 6s infinite;
+}
+
+/* CRT scanlines: thin dark lines laid over the whole screen */
+body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 100;
+    background: repeating-linear-gradient(
+        to bottom,
+        transparent 0,
+        transparent 2px,
+        rgba(0, 0, 0, 0.3) 2px,
+        rgba(0, 0, 0, 0.3) 4px
+    );
+}
+
+.terminal {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 24px 16px 32px;
+}
+
+/* ---------- Banner ---------- */
+
+.banner pre {
+    margin: 0 0 12px;
+    font: inherit;
+    font-size: clamp(10px, 3.4vw, 16px);
+    line-height: 1.25;
+    overflow-x: auto;
+}
+
+.boot {
+    margin: 0;
+    color: var(--green-dim);
+}
+
+.boot:last-child {
+    color: var(--green);
+}
+
+/* ---------- Panels ---------- */
+
+.panel {
+    margin: 24px 0;
+    padding: 16px;
+    background: var(--screen);
+    border: 4px double var(--green);
+}
+
+.panel h2 {
+    margin: 0 0 16px;
+    font-size: 1rem;
+    letter-spacing: 0.1em;
+    color: var(--amber);
+    text-shadow: 0 0 4px rgba(255, 176, 0, 0.6);
+}
+
+label,
+.label {
+    color: var(--amber);
+    text-shadow: 0 0 4px rgba(255, 176, 0, 0.6);
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+}
+
+.input-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    gap: 8px;
+}
+
+.prompt {
+    align-self: center;
+}
+
+input {
+    flex: 1 1 220px;
+    min-width: 0;
+    padding: 8px 10px;
+    font: inherit;
+    color: var(--green);
+    text-shadow: var(--glow);
+    caret-color: var(--green);
+    background: var(--bg);
+    border: 2px solid var(--green);
+    border-radius: 0;
+}
+
+input::placeholder {
+    color: var(--green-dim);
+    opacity: 1;
+}
+
+input:focus {
+    outline: 2px dashed var(--amber);
+    outline-offset: 2px;
+}
+
+button {
+    padding: 8px 18px;
+    font: inherit;
+    font-weight: bold;
+    letter-spacing: 0.1em;
+    color: var(--green);
+    text-shadow: var(--glow);
+    background: var(--bg);
+    border: 2px solid var(--green);
+    border-radius: 0;
+    box-shadow: 4px 4px 0 var(--green-dim);
+    cursor: pointer;
+}
+
+button:hover,
+button:focus-visible {
+    color: var(--screen);
+    text-shadow: none;
+    background: var(--green);
+    outline: none;
+}
+
+button:active {
+    transform: translate(4px, 4px);
+    box-shadow: none;
+}
+
+button:disabled {
+    cursor: wait;
+    opacity: 0.6;
+}
+
+/* ---------- Results ---------- */
+
+.result {
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 2px dashed var(--green-dim);
+}
+
+.result p {
+    margin: 4px 0;
+    overflow-wrap: anywhere;
+}
+
+a {
+    color: var(--amber);
+    text-shadow: 0 0 4px rgba(255, 176, 0, 0.6);
+}
+
+a:hover,
+a:focus-visible {
+    color: var(--screen);
+    text-shadow: none;
+    background: var(--amber);
+    outline: none;
+}
+
+/* ---------- Errors ---------- */
+
+.error-box {
+    margin-top: 16px;
+    padding: 12px 16px;
+    color: var(--red);
+    text-shadow: var(--red-glow);
+    border: 4px double var(--red);
+}
+
+.error-title {
+    margin: 0 0 8px;
+    font-weight: bold;
+    letter-spacing: 0.1em;
+}
+
+.error-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.error-list li::before {
+    content: "> ";
+}
+
+/* ---------- Footer ---------- */
+
+.footer {
+    padding-top: 12px;
+    border-top: 4px double var(--green);
+    letter-spacing: 0.1em;
+}
+
+/* ---------- Utilities ---------- */
+
+.cursor {
+    margin-left: 4px;
+    animation: blink 1s steps(1) infinite;
+}
+
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
+
+@keyframes blink {
+    50% {
+        opacity: 0;
+    }
+}
+
+@keyframes flicker {
+    0%, 96%, 100% {
+        opacity: 1;
+    }
+    97% {
+        opacity: 0.94;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body,
+    .cursor {
+        animation: none;
+    }
+}

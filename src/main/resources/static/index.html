@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>URL Shortener</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main class="terminal">
+
+    <header class="banner">
+        <h1 class="visually-hidden">URL Shortener</h1>
+<pre aria-hidden="true">╔══════════════════════════════════════╗
+║                                      ║
+║   U R L   S H O R T E N E R   v1.0   ║
+║                                      ║
+╚══════════════════════════════════════╝</pre>
+        <p class="boot">&gt; INITIALIZING ........... OK</p>
+        <p class="boot">&gt; DATABASE H2 ............ OK</p>
+        <p class="boot">&gt; CONNECTED AT 8080 BAUD<span class="cursor" aria-hidden="true">█</span></p>
+    </header>
+
+    <section class="panel" aria-labelledby="shorten-heading">
+        <h2 id="shorten-heading">[1] SHORTEN A URL</h2>
+        <form id="shorten-form" novalidate>
+            <label for="long-url">ENTER LONG URL:</label>
+            <div class="input-row">
+                <span class="prompt" aria-hidden="true">&gt;</span>
+                <input id="long-url" name="longUrl" type="text" autocomplete="off" spellcheck="false"
+                       placeholder="https://example.com/a/very/long/path">
+                <button id="shorten-button" type="submit">SHORTEN</button>
+            </div>
+        </form>
+
+        <div id="shorten-error" class="error-box" role="alert" hidden>
+            <p class="error-title">*** ERROR ***</p>
+            <ul class="error-list"></ul>
+        </div>
+
+        <div id="shorten-result" class="result" aria-live="polite" hidden>
+            <p><span class="label">SHORT CODE:</span> <span id="result-code"></span></p>
+            <p><span class="label">LINK:</span> <a id="result-link" href="#" target="_blank" rel="noopener"></a></p>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <span>SYSTEM ONLINE</span><span class="cursor" aria-hidden="true">█</span>
+    </footer>
+
+</main>
+<script src="app.js"></script>
+</body>
+</html>
