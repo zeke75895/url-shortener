@@ -37,11 +37,14 @@ public class UrlShortenerService {
         throw new ShortCodeGenerationException(MAX_ATTEMPTS);
     }
 
-    @Transactional(readOnly = true)
+    // Resolves a short code for a redirect and records the click
+    @Transactional
     public String getOriginalUrl(String shortCode) {
-        return repository.findByShortCode(shortCode)
+        String longUrl = repository.findByShortCode(shortCode)
                 .map(UrlMapping::getLongUrl)
                 .orElseThrow(() -> new UrlNotFoundException(shortCode));
+        repository.incrementClickCount(shortCode);
+        return longUrl;
     }
 
     private String generateShortCode() {
