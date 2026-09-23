@@ -15,7 +15,11 @@ RUN mvn -B package -DskipTests
 FROM eclipse-temurin:17-jre
 WORKDIR /app
 
-COPY --from=build /app/target/url-shortener-*.jar app.jar
+# Run as an unprivileged user instead of root
+RUN groupadd --system spring && useradd --system --gid spring spring
+
+COPY --from=build --chown=spring:spring /app/target/url-shortener-*.jar app.jar
+USER spring
 
 ENV SPRING_PROFILES_ACTIVE=docker
 
