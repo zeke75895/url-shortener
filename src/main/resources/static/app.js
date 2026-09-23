@@ -8,6 +8,7 @@ const shortenError = document.getElementById("shorten-error");
 const shortenResult = document.getElementById("shorten-result");
 const resultCode = document.getElementById("result-code");
 const resultLink = document.getElementById("result-link");
+const resultQr = document.getElementById("result-qr");
 
 const statsForm = document.getElementById("stats-form");
 const statsCodeInput = document.getElementById("stats-code");
@@ -75,6 +76,7 @@ function showShortenResult(body) {
     resultCode.textContent = body.shortCode;
     resultLink.href = body.shortUrl;
     resultLink.textContent = body.shortUrl;
+    renderQrCode(resultQr, body.shortUrl);
     shortenResult.hidden = false;
 
     addRecentLink(body.shortCode, longUrlInput.value.trim());
@@ -82,6 +84,42 @@ function showShortenResult(body) {
     // Show stats for the new code right away; autoRefreshStats keeps them current
     statsCodeInput.value = body.shortCode;
     statsForm.requestSubmit();
+}
+
+// Draws the QR code as an SVG: one path made of 1x1 squares, plus a 4-module quiet zone
+function renderQrCode(container, text) {
+    let matrix;
+    try {
+        matrix = createQrMatrix(text);
+    } catch (error) {
+        container.hidden = true;
+        return;
+    }
+
+    const quietZone = 4;
+    const size = matrix.length + quietZone * 2;
+    let pathData = "";
+    matrix.forEach(function (row, y) {
+        row.forEach(function (dark, x) {
+            if (dark) {
+                pathData += "M" + (x + quietZone) + " " + (y + quietZone) + "h1v1h-1z";
+            }
+        });
+    });
+
+    const svgNs = "http://www.w3.org/2000/svg";
+    const svg = document.createElementNS(svgNs, "svg");
+    svg.setAttribute("viewBox", "0 0 " + size + " " + size);
+    svg.setAttribute("shape-rendering", "crispEdges");
+    svg.setAttribute("role", "img");
+    svg.setAttribute("aria-label", "QR code for " + text);
+
+    const path = document.createElementNS(svgNs, "path");
+    path.setAttribute("d", pathData);
+    svg.appendChild(path);
+
+    container.replaceChildren(svg);
+    container.hidden = false;
 }
 
 async function handleShortenSubmit(event) {

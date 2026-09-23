@@ -38,9 +38,12 @@
             <ul class="error-list"></ul>
         </div>
 
-        <div id="shorten-result" class="result" aria-live="polite" hidden>
-            <p><span class="label">SHORT CODE:</span> <span id="result-code"></span></p>
-            <p><span class="label">LINK:</span> <a id="result-link" href="#" target="_blank" rel="noopener"></a></p>
+        <div id="shorten-result" class="result result-with-qr" aria-live="polite" hidden>
+            <div class="result-text">
+                <p><span class="label">SHORT CODE:</span> <span id="result-code"></span></p>
+                <p><span class="label">LINK:</span> <a id="result-link" href="#" target="_blank" rel="noopener"></a></p>
+            </div>
+            <div id="result-qr" class="qr"></div>
         </div>
     </section>
 
@@ -94,6 +97,7 @@
     </footer>
 
 </main>
+<script src="qrcode.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

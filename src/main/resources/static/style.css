@@ -190,6 +190,37 @@ button:disabled {
     overflow-wrap: anywhere;
 }
 
+.result-with-qr {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+.result-text {
+    flex: 1 1 240px;
+    min-width: 0;
+}
+
+/* Sits above the scanline overlay so a camera sees clean, evenly lit modules */
+.qr {
+    position: relative;
+    z-index: 101;
+    width: 148px;
+    border: 4px double var(--green);
+}
+
+.qr svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    background: var(--green);
+}
+
+.qr path {
+    fill: #000000;
+}
+
 a {
     color: var(--amber);
     text-shadow: 0 0 4px rgba(255, 176, 0, 0.6);
