@@ -9,6 +9,12 @@ const shortenResult = document.getElementById("shorten-result");
 const resultCode = document.getElementById("result-code");
 const resultLink = document.getElementById("result-link");
 
+const statsForm = document.getElementById("stats-form");
+const statsCodeInput = document.getElementById("stats-code");
+const statsButton = document.getElementById("stats-button");
+const statsError = document.getElementById("stats-error");
+const statsResult = document.getElementById("stats-result");
+
 // ---------- Helpers ----------
 
 // Returns the parsed JSON body, or null if the body is empty or not JSON
@@ -60,6 +66,9 @@ function showShortenResult(body) {
     resultLink.href = body.shortUrl;
     resultLink.textContent = body.shortUrl;
     shortenResult.hidden = false;
+
+    // Pre-fill the stats panel so the user can check clicks with one button press
+    statsCodeInput.value = body.shortCode;
 }
 
 async function handleShortenSubmit(event) {
@@ -89,3 +98,48 @@ async function handleShortenSubmit(event) {
 }
 
 shortenForm.addEventListener("submit", handleShortenSubmit);
+
+// ---------- Stats ----------
+
+// "2026-09-23T21:22:18.629139Z" -> "2026-09-23 21:22:18 UTC"
+function formatTimestamp(isoString) {
+    return isoString.replace("T", " ").slice(0, 19) + " UTC";
+}
+
+function showStatsResult(body) {
+    document.getElementById("stats-short-code").textContent = body.shortCode;
+    document.getElementById("stats-long-url").textContent = body.longUrl;
+    document.getElementById("stats-clicks").textContent = String(body.clickCount).padStart(6, "0");
+    document.getElementById("stats-created").textContent = formatTimestamp(body.createdAt);
+    statsResult.hidden = false;
+}
+
+async function handleStatsSubmit(event) {
+    event.preventDefault();
+    hideError(statsError);
+    statsResult.hidden = true;
+
+    const shortCode = statsCodeInput.value.trim();
+    if (shortCode === "") {
+        showError(statsError, ["ENTER A SHORT CODE"]);
+        return;
+    }
+
+    setBusy(statsButton, true, "WORKING...", "CHECK");
+    try {
+        const response = await fetch("/api/stats/" + encodeURIComponent(shortCode));
+        const body = await readJson(response);
+
+        if (!response.ok) {
+            showError(statsError, getErrorMessages(body, response.status));
+            return;
+        }
+        showStatsResult(body);
+    } catch (error) {
+        showError(statsError, ["CONNECTION LOST. IS THE SERVER RUNNING?"]);
+    } finally {
+        setBusy(statsButton, false, "WORKING...", "CHECK");
+    }
+}
+
+statsForm.addEventListener("submit", handleStatsSubmit);

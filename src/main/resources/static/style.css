@@ -200,6 +200,23 @@ a:focus-visible {
     outline: none;
 }
 
+.stats {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 4px 16px;
+    margin-bottom: 0;
+}
+
+.stats dt {
+    color: var(--amber);
+    text-shadow: 0 0 4px rgba(255, 176, 0, 0.6);
+}
+
+.stats dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
 /* ---------- Errors ---------- */
 
 .error-box {

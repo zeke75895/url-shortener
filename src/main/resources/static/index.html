@@ -44,6 +44,35 @@
         </div>
     </section>
 
+    <section class="panel" aria-labelledby="stats-heading">
+        <h2 id="stats-heading">[2] CHECK STATS</h2>
+        <form id="stats-form" novalidate>
+            <label for="stats-code">ENTER SHORT CODE:</label>
+            <div class="input-row">
+                <span class="prompt" aria-hidden="true">&gt;</span>
+                <input id="stats-code" name="shortCode" type="text" autocomplete="off" spellcheck="false"
+                       placeholder="abc123">
+                <button id="stats-button" type="submit">CHECK</button>
+            </div>
+        </form>
+
+        <div id="stats-error" class="error-box" role="alert" hidden>
+            <p class="error-title">*** ERROR ***</p>
+            <ul class="error-list"></ul>
+        </div>
+
+        <dl id="stats-result" class="result stats" aria-live="polite" hidden>
+            <dt>SHORT CODE</dt>
+            <dd id="stats-short-code"></dd>
+            <dt>LONG URL</dt>
+            <dd id="stats-long-url"></dd>
+            <dt>CLICKS</dt>
+            <dd id="stats-clicks"></dd>
+            <dt>CREATED</dt>
+            <dd id="stats-created"></dd>
+        </dl>
+    </section>
+
     <footer class="footer">
         <span>SYSTEM ONLINE</span><span class="cursor" aria-hidden="true">█</span>
     </footer>
