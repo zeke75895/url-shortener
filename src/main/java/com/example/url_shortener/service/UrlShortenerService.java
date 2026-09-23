@@ -5,6 +5,7 @@ import java.security.SecureRandom;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.url_shortener.exception.ShortCodeGenerationException;
 import com.example.url_shortener.exception.UrlNotFoundException;
 import com.example.url_shortener.model.UrlMapping;
 import com.example.url_shortener.repository.UrlMappingRepository;
@@ -15,6 +16,7 @@ public class UrlShortenerService {
     private static final String ALPHABET =
             "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     private static final int CODE_LENGTH = 6;
+    private static final int MAX_ATTEMPTS = 5;
 
     private final UrlMappingRepository repository;
     private final SecureRandom random = new SecureRandom();
@@ -25,9 +27,14 @@ public class UrlShortenerService {
 
     @Transactional
     public String shortenUrl(String longUrl) {
-        String shortCode = generateShortCode();
-        repository.save(new UrlMapping(longUrl, shortCode));
-        return shortCode;
+        for (int attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+            String shortCode = generateShortCode();
+            if (!repository.existsByShortCode(shortCode)) {
+                repository.save(new UrlMapping(longUrl, shortCode));
+                return shortCode;
+            }
+        }
+        throw new ShortCodeGenerationException(MAX_ATTEMPTS);
     }
 
     @Transactional(readOnly = true)

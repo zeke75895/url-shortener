@@ -9,4 +9,6 @@ import com.example.url_shortener.model.UrlMapping;
 public interface UrlMappingRepository extends JpaRepository<UrlMapping, Long> {
 
     Optional<UrlMapping> findByShortCode(String shortCode);
+
+    boolean existsByShortCode(String shortCode);
 }
